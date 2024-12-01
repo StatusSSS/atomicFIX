@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  rethinkdb:
+    image: rethinkdb:latest
+    container_name: llm_bot_rethinkdb
+    environment:
+      - RETHINKDB_DB=${RETHINKDB_DB}
+    restart: unless-stopped
+    ports:
+      - "28015:28015"
+      - "8080:8080"
+    volumes:
+      - rethinkdb_data:/data:rw
+
+  llm_bot_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - "7420:7420"
+    volumes:
+      - ./src:/opt/app-root/src:rw
+
+volumes:
+  rethinkdb_data:
+    external: false
