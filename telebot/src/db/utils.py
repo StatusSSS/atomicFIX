@@ -1,34 +1,9 @@
-
-"""
-from functools import wraps
-
-from llm_bot.db.database import AsyncSession
-
-
-def with_async_session(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        async with AsyncSession() as session:
-            return await func(*args, session=session, **kwargs)
-
-    return wrapper
-
-
-async def get_session() -> AsyncSession:
-    async with AsyncSession() as session:
-        yield session
-"""
-
 from contextlib import asynccontextmanager
 from rethinkdb import r
-
-# Настройки подключения к RethinkDB
-RDB_HOST = "rethinkdb"
-RDB_PORT = 28015
-RDB_DB = "llm_bot_db"
+from src.db.database import RDB_HOST, RDB_PORT, RDB_DB
 
 
-# Устанавливаем цикл событий для asyncio
+
 r.set_loop_type('asyncio')
 
 

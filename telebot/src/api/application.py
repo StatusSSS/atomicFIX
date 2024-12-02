@@ -16,18 +16,16 @@ from telegram.ext import (
     filters,
 )
 
-from llm_bot.api.commands import start, user_message, callback_query_handler, new_chat_command, enable_chat_command
-from llm_bot.api.config.kv_config import kv_settings
-from llm_bot.api.config.model_config import model_settings
-from llm_bot.api.config.telegram_bot_config import telegram_bot_config
-from llm_bot.api.security.security import get_admin_username
-from llm_bot.db.repository import set_value, get_value, get_keys, bulk_set_if_not_exists
+from src.api.commands import start, user_message, callback_query_handler, new_chat_command, enable_chat_command
+from src.api.config.kv_config import kv_settings
+from src.api.config.model_config import model_settings
+from src.api.config.telegram_bot_config import telegram_bot_config
+from src.api.security.security import get_admin_username
+from src.db.repository import set_value, get_value, get_keys, bulk_set_if_not_exists
+from src.db.database import RDB_HOST, RDB_PORT, RDB_DB
+
 from rethinkdb import r
 
-# RethinkDB connection settings
-RDB_HOST = "rethinkdb"
-RDB_PORT = 28015
-RDB_DB = "llm_bot_db"
 
 
 async def setup_rethinkdb():
@@ -38,7 +36,7 @@ async def setup_rethinkdb():
         if RDB_DB not in await r.db_list().run(conn):
             await r.db_create(RDB_DB).run(conn)
 
-        # Create necessary tables
+
         required_tables = ["users", "threads", "messages", "kv"]
         for table in required_tables:
             if table not in await r.db(RDB_DB).table_list().run(conn):
@@ -99,17 +97,17 @@ async def rethinkdb_connection():
 async def telegram_application_lifespan(app):
     """Жизненный цикл приложения с Telegram-ботом."""
     application = get_telegram_application()
-    await setup_rethinkdb()  # Инициализация базы данных
 
     async with application:
         await set_commands(application)
+        await setup_rethinkdb()
         await application.start()
         await set_webhook()
 
         async with rethinkdb_connection() as connection:
             logger.info(f"Model settings loaded: {model_settings}")
 
-            # Установка начальных значений в KV-хранилище
+
             await bulk_set_if_not_exists(
                 connection,
                 {

@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /opt/app-root/src/
+WORKDIR /opt/app-root/src
 
 COPY requirements.txt /opt/app-root/requirements.txt
 
